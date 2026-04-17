@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GovLens — Complete Developer Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070b14;
+    --bg2: #0d1526;
+    --bg3: #111d35;
+    --surface: #0f1e38;
+    --border: #1e3a5f;
+    --border2: #243d63;
+    --cyan: #00d4ff;
+    --cyan2: #00a8cc;
+    --green: #00ff9d;
+    --green2: #00cc7a;
+    --amber: #ffb800;
+    --red: #ff4d6d;
+    --purple: #a855f7;
+    --text: #e2ecff;
+    --text2: #8fa8cc;
+    --text3: #4a6080;
+    --code-bg: #060d1a;
+    --tag-bg: #0a1929;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── SCANLINE overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,212,255,0.012) 2px,
+      rgba(0,212,255,0.012) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 260px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    padding: 0 0 40px 0;
+  }
+
+  .sidebar-logo {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .sidebar-logo .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .sidebar-logo h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--cyan);
+    letter-spacing: 1px;
+  }
+
+  .sidebar-logo p {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .nav-section {
+    padding: 0 16px 8px;
+    margin-bottom: 4px;
+  }
+
+  .nav-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 8px 8px 6px;
+    display: block;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+  }
+
+  .nav-link:hover {
+    background: var(--bg3);
+    color: var(--cyan);
+  }
+
+  .nav-link .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border2);
+    flex-shrink: 0;
+  }
+
+  .nav-link:hover .dot { background: var(--cyan); }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-left: 260px;
+    padding: 0;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #050c1e 0%, #0a1830 40%, #0d1f3f 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 80px 60px 70px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -50px; left: 200px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 1px;
+    margin-bottom: 28px;
+  }
+
+  .hero-badge .pulse {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--cyan) 50%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 17px;
+    color: var(--text2);
+    max-width: 680px;
+    line-height: 1.8;
+    margin-bottom: 36px;
+  }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .tag.cyan { border-color: rgba(0,212,255,0.3); color: var(--cyan); background: rgba(0,212,255,0.05); }
+  .tag.green { border-color: rgba(0,255,157,0.3); color: var(--green); background: rgba(0,255,157,0.05); }
+  .tag.purple { border-color: rgba(168,85,247,0.3); color: var(--purple); background: rgba(168,85,247,0.05); }
+  .tag.amber { border-color: rgba(255,184,0,0.3); color: var(--amber); background: rgba(255,184,0,0.05); }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 60px 60px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .section-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--cyan);
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    margin-top: 8px;
+  }
+
+  .section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .section h2 span { color: var(--cyan); }
+
+  .section-desc {
+    color: var(--text2);
+    font-size: 15px;
+    margin-top: 8px;
+    max-width: 700px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .ci-cyan { background: rgba(0,212,255,0.1); }
+  .ci-green { background: rgba(0,255,157,0.1); }
+  .ci-purple { background: rgba(168,85,247,0.1); }
+  .ci-amber { background: rgba(255,184,0,0.1); }
+  .ci-red { background: rgba(255,77,109,0.1); }
+
+  .card p { color: var(--text2); font-size: 14px; line-height: 1.8; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .code-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .code-header span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 1px;
+  }
+
+  .code-dots { display: flex; gap: 6px; }
+  .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .cd-red { background: #ff5f57; }
+  .cd-yellow { background: #febc2e; }
+  .cd-green { background: #28c840; }
+
+  pre {
+    padding: 20px 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #c9d8f0;
+  }
+
+  .kw { color: #ff79c6; }
+  .fn { color: #50fa7b; }
+  .st { color: #f1fa8c; }
+  .cm { color: #5a7399; font-style: italic; }
+  .ty { color: #8be9fd; }
+  .nu { color: #bd93f9; }
+  .an { color: #ffb86c; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 24px 0;
+  }
+
+  .flow-step {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 130px;
+  }
+
+  .flow-step .fs-icon { font-size: 22px; margin-bottom: 6px; }
+  .flow-step .fs-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    display: block;
+  }
+  .flow-step .fs-tech {
+    font-size: 10px;
+    color: var(--text3);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .flow-arrow {
+    font-size: 20px;
+    color: var(--border2);
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* ── TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13.5px;
+  }
+
+  .data-table th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    text-align: left;
+  }
+
+  .data-table td {
+    border: 1px solid var(--border);
+    padding: 11px 16px;
+    color: var(--text2);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  .data-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+  /* ── ALERT BOXES ── */
+  .alert {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-left: 3px solid;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .alert-cyan { background: rgba(0,212,255,0.06); border-color: var(--cyan); color: #a0d8ef; }
+  .alert-green { background: rgba(0,255,157,0.06); border-color: var(--green); color: #a0efcf; }
+  .alert-amber { background: rgba(255,184,0,0.06); border-color: var(--amber); color: #f0d080; }
+  .alert-red { background: rgba(255,77,109,0.06); border-color: var(--red); color: #f0a0b0; }
+
+  .alert strong { display: block; margin-bottom: 4px; font-weight: 600; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* ── STEPS ── */
+  .steps { counter-reset: step; }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 32px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    counter-increment: step;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--bg);
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .step-content h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .step-content p { color: var(--text2); font-size: 14px; }
+
+  /* ── ROLE BADGES ── */
+  .role {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .role-admin { background: rgba(168,85,247,0.15); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
+  .role-manager { background: rgba(0,212,255,0.1); color: var(--cyan); border: 1px solid rgba(0,212,255,0.25); }
+  .role-analyst { background: rgba(0,255,157,0.1); color: var(--green); border: 1px solid rgba(0,255,157,0.25); }
+
+  /* ── STATUS BADGES ── */
+  .status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 100px; }
+  .s-open { background: rgba(0,212,255,0.1); color: var(--cyan); }
+  .s-inprogress { background: rgba(255,184,0,0.1); color: var(--amber); }
+  .s-resolved { background: rgba(0,255,157,0.1); color: var(--green); }
+  .s-closed { background: rgba(100,100,120,0.2); color: #888; }
+  .s-escalated { background: rgba(255,77,109,0.1); color: var(--red); }
+
+  /* ── PRIORITY BADGES ── */
+  .priority { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+  .p1 { background: rgba(255,77,109,0.15); color: var(--red); }
+  .p2 { background: rgba(255,120,0,0.15); color: #ff7800; }
+  .p3 { background: rgba(255,184,0,0.15); color: var(--amber); }
+  .p4 { background: rgba(0,212,255,0.1); color: var(--cyan); }
+  .p5 { background: rgba(0,255,157,0.1); color: var(--green); }
+
+  /* ── ARCHITECTURE DIAGRAM ── */
+  .arch {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin: 24px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text2);
+    line-height: 2;
+  }
+
+  .arch .layer-label { color: var(--cyan); font-weight: 700; }
+  .arch .box { color: var(--green); }
+  .arch .arrow { color: var(--text3); }
+  .arch .comment { color: var(--text3); font-style: italic; }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.15);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--cyan);
+  }
+
+  /* ── TOC PROGRESS ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 260px; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    transform-origin: left;
+    z-index: 200;
+  }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; margin: 16px 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(30,58,95,0.5);
+    color: var(--text2);
+    font-size: 14px;
+  }
+  .checklist li:last-child { border: none; }
+  .check { color: var(--green); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .cross { color: var(--red); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .warn { color: var(--amber); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cyan2); }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { padding: 40px 24px; }
+    .section { padding: 40px 24px; }
+    .hero h1 { font-size: 32px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; align-items: flex-start; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">⚡</div>
+    <h2>GovLens</h2>
+    <p>Developer Guide v1.0</p>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-section-title">Getting Started</span>
+    <a href="#overview" class="nav-link"><span class="dot"></span> What Is GovLens?</a>
+    <a href="#architecture" class="nav-link"><span class="dot"></span> System Architecture</a>
+    <a href="#tech-stack" class="nav-link"><span class="dot"></span> Tech Stack</a>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-section-title">Frontend</span>
+    <a href="#login" class="nav-link"><span class="dot"></span> Login Page</a>
+    <a href="#dashboard" class="nav-link"><span class="dot"></span> Overview Dashboard</a>
+    <a href="#requests" class="nav-link"><span class="dot"></span> Service Requests</a>
+    <a href="#insights" class="nav-link"><span class="dot"></span> AI Insights</a>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-section-title">Backend</span>
+    <a href="#database" class="nav-link"><span class="dot"></span> Database Design</a>
+    <a href="#api" class="nav-link"><span class="dot"></span> REST API Endpoints</a>
+    <a href="#auth" class="nav-link"><span class="dot"></span> Authentication & JWT</a>
+    <a href="#roles" class="nav-link"><span class="dot"></span> Role-Based Access</a>
+    <a href="#sla" class="nav-link"><span class="dot"></span> SLA System</a>
+    <a href="#ai-engine" class="nav-link"><span class="dot"></span> AI Engine</a>
+  </div>
+
+  <div class="nav-section">
+    <span class="nav-section-title">Data & Deployment</span>
+    <a href="#seed" class="nav-link"><span class="dot"></span> Seed Data</a>
+    <a href="#live-data" class="nav-link"><span class="dot"></span> Live Data Strategy</a>
+    <a href="#bugs" class="nav-link"><span class="dot"></span> Current Bugs & Fixes</a>
+    <a href="#demo" class="nav-link"><span class="dot"></span> Presenting to Employers</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- HERO -->
+<section class="hero" id="overview">
+  <div class="hero-badge">
+    <span class="pulse"></span>
+    COMPLETE DEVELOPER GUIDE — BEGINNER FRIENDLY
+  </div>
+  <h1>GovLens<br>Developer Bible</h1>
+  <p>
+    Everything you need to understand, build, and explain this project — from database tables to frontend components to AI insights. Written so clearly that a beginner can follow along and build the whole thing from scratch.
+  </p>
+  <div class="hero-tags">
+    <span class="tag cyan">React Frontend</span>
+    <span class="tag green">Spring Boot Backend</span>
+    <span class="tag amber">PostgreSQL Database</span>
+    <span class="tag purple">OpenAI GPT-4</span>
+    <span class="tag">JWT Auth</span>
+    <span class="tag">Role-Based Access</span>
+    <span class="tag">SLA Engine</span>
+    <span class="tag">NYC 311 Open Data</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 1 — WHAT IS GOVLENS
+════════════════════════════════════════════════ -->
+<section class="section" id="overview-detail">
+  <div class="section-header">
+    <span class="section-number">01</span>
+    <div>
+      <h2>What Is <span>GovLens</span>?</h2>
+      <p class="section-desc">Understanding the purpose, the users, and the core idea — before writing a single line of code.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-cyan">
+    <strong>Think of it this way:</strong>
+    Imagine a city has 8 departments (Public Works, Transportation, Parks, etc.). Every day, hundreds of citizens call or email to report problems — potholes, broken streetlights, building permit delays, water leaks. GovLens is the system that tracks all of these complaints, shows managers how fast they're being resolved, and uses AI to generate plain-English summaries of performance.
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3><span class="card-icon ci-cyan">🏛️</span> The Problem It Solves</h3>
+      <p>Without GovLens, city managers dig through spreadsheets to find out why permits are backlogged or why repairs take 3 weeks. GovLens puts everything on one screen — instantly.</p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-green">👥</span> Who Uses It</h3>
+      <p><strong style="color:var(--purple)">Admin</strong> — full control<br><strong style="color:var(--cyan)">Manager</strong> — create & update requests, generate AI insights<br><strong style="color:var(--green)">Analyst</strong> — view only, read reports</p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-purple">📊</span> Core Value</h3>
+      <p>Real-time visibility into SLA compliance, department performance, resolution speed, and AI-powered recommendations — all in one dashboard.</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif; font-size:18px; margin: 32px 0 16px; color:var(--cyan)">The 3 Screens (Tabs) in the App</h3>
+  <table class="data-table">
+    <thead><tr><th>Tab</th><th>What It Shows</th><th>Who Can Use It</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Overview Dashboard</strong></td><td>KPI cards (Open, Resolved, Avg Time, SLA%), 8 department performance cards, drill-down charts</td><td>All roles</td></tr>
+      <tr><td><strong>Service Requests</strong></td><td>Full paginated table of every request (10,000+). Filter by status/department. Create or update requests.</td><td>View: All — Create/Update: Admin + Manager</td></tr>
+      <tr><td><strong>AI Insights</strong></td><td>AI-generated plain-English analysis of each department's performance with recommendations</td><td>View: All — Generate: Admin + Manager</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 2 — ARCHITECTURE
+════════════════════════════════════════════════ -->
+<section class="section" id="architecture">
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <div>
+      <h2>System <span>Architecture</span></h2>
+      <p class="section-desc">How all the pieces fit together — from the browser to the database. This is the big picture before diving into code.</p>
+    </div>
+  </div>
+
+  <div class="arch">
+<span class="layer-label">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="layer-label">│                        BROWSER (User)                           │</span>
+<span class="layer-label">│</span>  <span class="box">React App</span> → Login Page, Dashboard, Requests Tab, AI Insights Tab
+<span class="layer-label">└──────────────────────────────┬──────────────────────────────────┘</span>
+                               <span class="arrow">│  HTTP Requests (with JWT token in header)</span>
+                               <span class="arrow">▼</span>
+<span class="layer-label">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="layer-label">│                  SPRING BOOT BACKEND (Java)                     │</span>
+<span class="layer-label">│</span>  <span class="box">AuthController</span>      → handles login, returns JWT token
+<span class="layer-label">│</span>  <span class="box">DashboardController</span> → returns KPI numbers & dept summaries
+<span class="layer-label">│</span>  <span class="box">RequestController</span>   → CRUD for service requests
+<span class="layer-label">│</span>  <span class="box">InsightController</span>   → triggers & returns AI insights
+<span class="layer-label">│</span>  <span class="box">JwtFilter</span>          → checks token on every protected request
+<span class="layer-label">└──────────────┬──────────────────────────────────┬──────────────┘</span>
+               <span class="arrow">│ SQL queries (JPA/Hibernate)</span>         <span class="arrow">│ HTTP calls</span>
+               <span class="arrow">▼</span>                                     <span class="arrow">▼</span>
+<span class="layer-label">┌──────────────────────┐</span>             <span class="layer-label">┌──────────────────────────┐</span>
+<span class="layer-label">│  PostgreSQL Database │</span>             <span class="layer-label">│  OpenAI GPT-4 API        │</span>
+<span class="layer-label">│</span>  <span class="box">users</span> table         <span class="layer-label">│</span>             <span class="layer-label">│</span>  <span class="comment">(or rule-based fallback)</span>  <span class="layer-label">│</span>
+<span class="layer-label">│</span>  <span class="box">departments</span> table   <span class="layer-label">│</span>             <span class="layer-label">└──────────────────────────┘</span>
+<span class="layer-label">│</span>  <span class="box">service_requests</span>    <span class="layer-label">│</span>
+<span class="layer-label">│</span>  <span class="box">ai_insights</span> table   <span class="layer-label">│</span>
+<span class="layer-label">└──────────────────────┘</span>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="fs-icon">👤</div>
+      <span class="fs-label">User</span>
+      <span class="fs-tech">Browser</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <div class="fs-icon">⚛️</div>
+      <span class="fs-label">React App</span>
+      <span class="fs-tech">Frontend</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <div class="fs-icon">🔒</div>
+      <span class="fs-label">JWT Token</span>
+      <span class="fs-tech">Auth Header</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <div class="fs-icon">☕</div>
+      <span class="fs-label">Spring Boot</span>
+      <span class="fs-tech">Backend API</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <div class="fs-icon">🐘</div>
+      <span class="fs-label">PostgreSQL</span>
+      <span class="fs-tech">Database</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <div class="fs-icon">🤖</div>
+      <span class="fs-label">GPT-4 API</span>
+      <span class="fs-tech">AI Insights</span>
+    </div>
+  </div>
+
+  <div class="alert alert-green">
+    <strong>How They Talk To Each Other:</strong>
+    The React frontend sends HTTP requests (like fetch() or axios) to the Spring Boot backend. The backend processes those requests, reads/writes to PostgreSQL, and when AI insights are needed, calls the OpenAI API. Every request from the frontend must include a JWT token in the header — Spring Boot checks this token to know who you are and what you're allowed to do.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 3 — TECH STACK
+════════════════════════════════════════════════ -->
+<section class="section" id="tech-stack">
+  <div class="section-header">
+    <span class="section-number">03</span>
+    <div>
+      <h2>Tech Stack <span>Explained</span></h2>
+      <p class="section-desc">Every technology used, what it does, and why it's used — for complete beginners.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="card-icon ci-cyan">⚛️</span> React (Frontend)</h3>
+      <p><strong>What it is:</strong> A JavaScript library for building user interfaces. It lets you build the Login page, Dashboard, Requests table, and Insights tab as reusable "components".<br><br><strong>Why React:</strong> It updates only the parts of the page that change (like updating a counter) without reloading the whole page.</p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-green">☕</span> Spring Boot (Backend)</h3>
+      <p><strong>What it is:</strong> A Java framework that makes it easy to create REST APIs. When the frontend says "give me all requests", Spring Boot is the part that handles that request, talks to the database, and sends back the data.<br><br><strong>Why Spring Boot:</strong> Industry standard for Java backends. Built-in security, JPA for database, REST support out of the box.</p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-amber">🐘</span> PostgreSQL (Database)</h3>
+      <p><strong>What it is:</strong> A powerful open-source relational database. Stores all users, departments, service requests, and AI insight caches in structured tables.<br><br><strong>Why PostgreSQL:</strong> Handles large datasets well (10,000+ requests), supports complex queries for calculating SLA compliance, averages, and counts.</p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-purple">🤖</span> OpenAI GPT-4 (AI)</h3>
+      <p><strong>What it is:</strong> An AI language model accessed via API. You send it the department's metrics as a prompt, and it returns a paragraph of analysis in plain English.<br><br><strong>Fallback:</strong> If no API key is set, GovLens uses a rule-based engine (if/else logic) to generate insights from the numbers.</p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-red">🔐</span> JWT (Authentication)</h3>
+      <p><strong>What it is:</strong> JSON Web Token. After login, the backend sends a token (a long encoded string). The frontend stores this and sends it with every request.<br><br><strong>Why JWT:</strong> Stateless — the server doesn't need to remember who's logged in. The token itself contains the username and role.</p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-cyan">🔗</span> JPA / Hibernate (ORM)</h3>
+      <p><strong>What it is:</strong> A tool that maps Java classes to database tables automatically. Instead of writing raw SQL, you write Java code and Hibernate translates it to SQL.<br><br><strong>Example:</strong> <code>requestRepo.findAll()</code> automatically runs <code>SELECT * FROM service_requests</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 4 — LOGIN PAGE
+════════════════════════════════════════════════ -->
+<section class="section" id="login">
+  <div class="section-header">
+    <span class="section-number">04</span>
+    <div>
+      <h2>The <span>Login Page</span></h2>
+      <p class="section-desc">The entry point of the app. How it works, what code drives it, and how it connects to the backend.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-cyan">
+    <strong>What You See:</strong>
+    The login page shows the GovLens logo, "All Systems Operational" status badge, a username/password form, a "Sign In to Dashboard" button, and 3 demo account rows at the bottom (admin, manager1, analyst1) that auto-fill the form when clicked.
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">Demo Accounts</h3>
+  <table class="data-table">
+    <thead><tr><th>Username</th><th>Password</th><th>Role</th><th>What They Can Do</th></tr></thead>
+    <tbody>
+      <tr><td><code>admin</code></td><td><code>admin123</code></td><td><span class="role role-admin">ADMIN</span></td><td>Everything — full access to all features</td></tr>
+      <tr><td><code>manager1</code></td><td><code>admin123</code></td><td><span class="role role-manager">MANAGER</span></td><td>View all data, create/update requests, generate AI insights</td></tr>
+      <tr><td><code>analyst1</code></td><td><code>admin123</code></td><td><span class="role role-analyst">ANALYST</span></td><td>View all data and reports — read only, no creating or editing</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">Complete Login Flow — Step by Step</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>User types username + password and clicks Sign In</h4>
+        <p>React captures the form values in state: <code>const [username, setUsername] = useState('')</code>. When Sign In is clicked, it calls a <code>handleLogin()</code> function.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>React sends a POST request to the backend</h4>
+        <p>The frontend calls <code>POST /api/auth/login</code> with body <code>{"username": "admin", "password": "admin123"}</code></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Spring Boot checks the credentials against PostgreSQL</h4>
+        <p>It runs a query to find the user by username, then uses BCrypt to verify the password. BCrypt is a hashing algorithm — passwords are never stored as plain text.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>If valid, Spring Boot generates and returns a JWT token</h4>
+        <p>The token contains the username and role (e.g. "MANAGER"). It's returned as JSON: <code>{"token": "eyJ...", "role": "MANAGER", "username": "manager1"}</code></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>React stores the token and redirects to the dashboard</h4>
+        <p>Token is saved in <code>localStorage</code>. The role is saved in React Context so every component knows what the current user can see/do. User is redirected to the Overview tab.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Every future API call includes the token in the header</h4>
+        <p>All subsequent requests include: <code>Authorization: Bearer eyJhbGc...</code>. Spring Boot's JwtFilter reads this token, verifies it, and extracts the role for permission checks.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>React — handleLogin function</span>
+    </div>
+    <pre><span class="kw">const</span> <span class="fn">handleLogin</span> = <span class="kw">async</span> () => {
+  <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="st">'/api/auth/login'</span>, {
+    method: <span class="st">'POST'</span>,
+    headers: { <span class="st">'Content-Type'</span>: <span class="st">'application/json'</span> },
+    body: JSON.stringify({ username, password })
+  });
+
+  <span class="kw">if</span> (response.ok) {
+    <span class="kw">const</span> data = <span class="kw">await</span> response.json();
+    localStorage.setItem(<span class="st">'token'</span>, data.token);   <span class="cm">// save JWT</span>
+    localStorage.setItem(<span class="st">'role'</span>, data.role);     <span class="cm">// save role</span>
+    navigate(<span class="st">'/dashboard'</span>);                     <span class="cm">// go to dashboard</span>
+  } <span class="kw">else</span> {
+    setError(<span class="st">'Invalid username or password'</span>);
+  }
+};</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>Spring Boot — AuthController.java</span>
+    </div>
+    <pre><span class="an">@PostMapping</span>(<span class="st">"/api/auth/login"</span>)
+<span class="kw">public</span> ResponseEntity&lt;?&gt; <span class="fn">login</span>(<span class="an">@RequestBody</span> LoginRequest req) {
+
+  <span class="cm">// 1. Find user in database</span>
+  User user = userRepo.findByUsername(req.getUsername())
+      .orElseThrow(() -> <span class="kw">new</span> BadCredentialsException(<span class="st">"User not found"</span>));
+
+  <span class="cm">// 2. Check password using BCrypt</span>
+  <span class="kw">if</span> (!passwordEncoder.matches(req.getPassword(), user.getPasswordHash())) {
+      <span class="kw">return</span> ResponseEntity.status(<span class="nu">401</span>).body(<span class="st">"Invalid credentials"</span>);
+  }
+
+  <span class="cm">// 3. Generate JWT token with username + role inside it</span>
+  String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
+
+  <span class="cm">// 4. Return token + role to frontend</span>
+  <span class="kw">return</span> ResponseEntity.ok(Map.of(
+      <span class="st">"token"</span>, token,
+      <span class="st">"role"</span>, user.getRole(),
+      <span class="st">"username"</span>, user.getUsername()
+  ));
+}</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 5 — OVERVIEW DASHBOARD
+════════════════════════════════════════════════ -->
+<section class="section" id="dashboard">
+  <div class="section-header">
+    <span class="section-number">05</span>
+    <div>
+      <h2>Overview <span>Dashboard</span></h2>
+      <p class="section-desc">The first screen after login. What each number means, how it's calculated, and what the department cards show.</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:0 0 16px;color:var(--cyan)">The 4 KPI Cards</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="color:var(--cyan)">🔵 Open Requests — 4,000</h3>
+      <p>Total service requests that are currently OPEN or IN_PROGRESS across all departments. This is how many citizen issues are waiting to be resolved right now.<br><br><strong>SQL:</strong> <code>SELECT COUNT(*) FROM service_requests WHERE status IN ('OPEN','IN_PROGRESS')</code></p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green)">🟢 Resolved — 4,000</h3>
+      <p>How many requests were resolved in the last 30 days. This is your throughput — are you resolving faster than new ones come in?<br><br><strong>SQL:</strong> <code>SELECT COUNT(*) FROM service_requests WHERE status = 'RESOLVED' AND resolved_at >= NOW() - INTERVAL '30 days'</code></p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--amber)">⏱️ Avg Resolution Time — 2d 11h</h3>
+      <p>Average time from submission to resolution, across all departments. Calculated from the difference between <code>submitted_at</code> and <code>resolved_at</code>.<br><br><strong>SQL:</strong> <code>SELECT AVG(resolved_at - submitted_at) FROM service_requests WHERE status = 'RESOLVED'</code></p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--red)">🔴 SLA Compliance — 71.4%</h3>
+      <p>Percentage of requests resolved before their SLA deadline. Currently <strong>below the 80% target</strong> — that's why the card is red. Formula: <code>(resolved before deadline ÷ total resolved) × 100</code></p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:32px 0 16px;color:var(--cyan)">Department Cards</h3>
+  <div class="alert alert-amber">
+    <strong>Each department card shows:</strong>
+    Open count, Resolved count, Total requests handled, Average resolution time for that department, SLA compliance bar (green=good, amber=borderline, red=failing), and an overdue badge if any requests are past their deadline.
+  </div>
+
+  <table class="data-table">
+    <thead><tr><th>Department</th><th>SLA %</th><th>Overdue</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Public Works</td><td>71.4%</td><td>485</td><td style="color:var(--red)">⚠ Failing (below 80%)</td></tr>
+      <tr><td>Health & Human Services</td><td>70.6%</td><td>491</td><td style="color:var(--red)">⚠ Failing</td></tr>
+      <tr><td>Transportation</td><td>85%</td><td>488</td><td style="color:var(--amber)">~ Borderline (just above 80%)</td></tr>
+      <tr><td>Parks & Recreation</td><td>~71%</td><td>491</td><td style="color:var(--red)">⚠ Failing</td></tr>
+      <tr><td>Building & Permits</td><td>~70%</td><td>490</td><td style="color:var(--red)">⚠ Failing</td></tr>
+      <tr><td>Water & Sanitation</td><td>~72%</td><td>493</td><td style="color:var(--red)">⚠ Failing</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">Department Drill-Down (Click Any Card)</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="card-icon ci-cyan">📈</span> Line Chart</h3>
+      <p>Daily request volume over the last 30 days. Built with <strong>Recharts</strong> library in React. You can see spikes — like after a storm when pothole reports surge. Backend provides data as: <code>[{"date": "2026-04-01", "count": 45}, ...]</code></p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-purple">🥧</span> Pie Chart</h3>
+      <p>Breakdown of requests by status — OPEN, IN_PROGRESS, RESOLVED, CLOSED, ESCALATED. Also built with Recharts. Shows if requests are moving through the pipeline or getting stuck at a particular stage.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>Spring Boot — DashboardController.java (overview endpoint)</span>
+    </div>
+    <pre><span class="an">@GetMapping</span>(<span class="st">"/api/dashboard/overview"</span>)
+<span class="kw">public</span> OverviewDTO <span class="fn">getOverview</span>() {
+    <span class="kw">return</span> OverviewDTO.builder()
+        .openRequests(requestRepo.countByStatusIn(List.of(<span class="st">"OPEN"</span>, <span class="st">"IN_PROGRESS"</span>)))
+        .resolvedLast30Days(requestRepo.countResolvedSince(LocalDate.now().minusDays(<span class="nu">30</span>)))
+        .avgResolutionHours(requestRepo.calcAvgResolutionHours())
+        .slaCompliance(requestRepo.calcSlaCompliance())
+        .departments(deptService.getAllDeptSummaries())
+        .build();
+}</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 6 — SERVICE REQUESTS
+════════════════════════════════════════════════ -->
+<section class="section" id="requests">
+  <div class="section-header">
+    <span class="section-number">06</span>
+    <div>
+      <h2>Service <span>Requests</span> Tab</h2>
+      <p class="section-desc">The master ticket queue. Who creates requests, what the columns mean, and how the priority score works.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-amber">
+    <strong>Important: Who Creates Service Requests?</strong>
+    In a real government system, CITIZENS submit requests (via a public portal, phone line, or mobile app). In GovLens's current design, there is no citizen portal yet — so MANAGERS and ADMINS add requests manually to simulate intake staff logging phone/walk-in complaints. The seed data (10,000 pre-loaded requests) represents historical citizen submissions.
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">What Each Column Means</h3>
+  <table class="data-table">
+    <thead><tr><th>Column</th><th>What It Is</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ID</strong></td><td>Unique reference number for the request</td><td><code>#SR-00042</code></td></tr>
+      <tr><td><strong>Title / Category</strong></td><td>Short description of the issue and its type</td><td>"Pothole on Main St" / Infrastructure</td></tr>
+      <tr><td><strong>Department</strong></td><td>Which city department handles this</td><td>Public Works</td></tr>
+      <tr><td><strong>Priority</strong></td><td>How urgent it is — determines SLA deadline</td><td><span class="priority p1">P1</span> <span class="priority p2">P2</span> <span class="priority p3">P3</span> <span class="priority p4">P4</span> <span class="priority p5">P5</span></td></tr>
+      <tr><td><strong>Status</strong></td><td>Current state of the request</td><td><span class="status s-open">● OPEN</span> <span class="status s-inprogress">● IN PROGRESS</span> <span class="status s-resolved">● RESOLVED</span> <span class="status s-escalated">● ESCALATED</span></td></tr>
+      <tr><td><strong>Score</strong></td><td>Dynamic urgency score — increases as the request ages and spikes near SLA deadline</td><td>89.4 (high urgency)</td></tr>
+      <tr><td><strong>Submitted</strong></td><td>Date the citizen submitted the request</td><td>Apr 10, 2026</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">The 5 Request Statuses Explained</h3>
+  <div class="grid-2">
+    <div class="card">
+      <p>
+        <span class="status s-open">● OPEN</span> — Just submitted, not yet assigned to anyone.<br><br>
+        <span class="status s-inprogress">● IN PROGRESS</span> — Someone is actively working on it.<br><br>
+        <span class="status s-resolved">● RESOLVED</span> — Work is done, citizen issue is fixed. Resolution timestamp is recorded here — this feeds into Avg Resolution Time.<br><br>
+        <span class="status s-closed">● CLOSED</span> — Officially closed out and archived.<br><br>
+        <span class="status s-escalated">● ESCALATED</span> — Flagged as urgent — either too old or a citizen complained it wasn't fixed.
+      </p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-cyan">🔢</span> Priority Score Formula</h3>
+      <p>Calculated by a scheduled job running every hour in Spring Boot (<code>@Scheduled</code>):</p>
+      <div class="code-block" style="margin-top:12px">
+        <pre style="font-size:11px"><span class="cm">// Higher score = needs attention sooner</span>
+ageScore = hoursSinceSubmit × 0.5
+slaScore = breachingIn24h ? 50 : 0
+priorityScore = (6 - priorityLevel) × 10
+<span class="cm">// P1=50pts, P2=40pts, P3=30pts, P4=20, P5=10</span>
+
+totalScore = ageScore + slaScore + priorityScore</pre>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">Creating a New Request (Manager/Admin Only)</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Click "+ New Request" button</h4>
+        <p>A form slides in. Fill in: Title, Description, Department, Category (Infrastructure / Permits / Utilities / Maintenance / Inspection / Traffic / Complaint / Safety), and Priority (P1-P5).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>React sends POST /api/requests to backend</h4>
+        <p>The form data is sent as JSON. The JWT token is included in the header. Spring Boot checks that the user has MANAGER or ADMIN role before proceeding.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Backend auto-calculates SLA deadline and saves to DB</h4>
+        <p>Based on priority: P1 → +4 hours, P2 → +12 hours, P3 → +48 hours, P4 → +5 days, P5 → +10 days. Status defaults to OPEN. Priority score is calculated. Row is inserted into <code>service_requests</code> table.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>New request immediately appears in the table</h4>
+        <p>React re-fetches the requests list and the new row appears at the top. The KPI cards on the Overview update on next refresh.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>Spring Boot — ServiceRequest.java (JPA Entity with SLA auto-calculation)</span>
+    </div>
+    <pre><span class="an">@Entity</span>
+<span class="an">@Table</span>(name = <span class="st">"service_requests"</span>)
+<span class="kw">public class</span> <span class="ty">ServiceRequest</span> {
+
+    <span class="an">@Id @GeneratedValue</span>
+    <span class="kw">private</span> Long id;
+
+    <span class="kw">private</span> String title, description, category, status, assignedTo;
+
+    <span class="an">@ManyToOne</span>
+    <span class="kw">private</span> Department department;
+
+    <span class="kw">private</span> String priority;         <span class="cm">// "P1" through "P5"</span>
+    <span class="kw">private</span> LocalDateTime submittedAt;
+    <span class="kw">private</span> LocalDateTime resolvedAt;
+    <span class="kw">private</span> LocalDateTime slaDeadline; <span class="cm">// auto-calculated below</span>
+    <span class="kw">private</span> Double priorityScore;
+
+    <span class="cm">// This runs automatically BEFORE the row is saved to the database</span>
+    <span class="an">@PrePersist</span>
+    <span class="kw">public void</span> <span class="fn">prePersist</span>() {
+        <span class="kw">this</span>.submittedAt = LocalDateTime.now();
+        <span class="kw">this</span>.status = <span class="st">"OPEN"</span>;
+        <span class="cm">// Set SLA deadline based on priority</span>
+        <span class="kw">this</span>.slaDeadline = <span class="kw">switch</span>(priority) {
+            <span class="kw">case</span> <span class="st">"P1"</span> -> submittedAt.plusHours(<span class="nu">4</span>);
+            <span class="kw">case</span> <span class="st">"P2"</span> -> submittedAt.plusHours(<span class="nu">12</span>);
+            <span class="kw">case</span> <span class="st">"P3"</span> -> submittedAt.plusHours(<span class="nu">48</span>);
+            <span class="kw">case</span> <span class="st">"P4"</span> -> submittedAt.plusDays(<span class="nu">5</span>);
+            <span class="kw">default</span>  -> submittedAt.plusDays(<span class="nu">10</span>); <span class="cm">// P5</span>
+        };
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 7 — AI INSIGHTS
+════════════════════════════════════════════════ -->
+<section class="section" id="insights">
+  <div class="section-header">
+    <span class="section-number">07</span>
+    <div>
+      <h2>AI <span>Insights</span> Tab</h2>
+      <p class="section-desc">How the AI engine works, what it generates, why it's failing, and how to fix it.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-red">
+    <strong>Current Bug: "Failed to load insights"</strong>
+    This error means the <code>GET /api/insights</code> endpoint is returning an error (likely 500). Check your Spring Boot logs. Most likely cause: the <code>ai_insights</code> table doesn't exist in your DB yet, or the repository is throwing a NullPointerException. The fix is in the Database section below.
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">What AI Insights Actually Generate</h3>
+  <div class="card" style="border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.04)">
+    <h3 style="color:var(--cyan)">🏛️ Public Works — <span style="font-size:12px;color:var(--text3)">AI GENERATED · Apr 16, 2026 7:00 PM</span></h3>
+    <p style="margin-top:12px; line-height:2; font-size:14px">
+      "Public Works is currently managing 500 open requests with an average resolution time of 2 days 10 hours and SLA compliance at 71.4% — critically below the 80% target. The 485 overdue requests represent a severe backlog risk, predominantly in the Infrastructure category (42%) and Maintenance (31%). Resolution velocity has remained consistent but is insufficient to absorb incoming volume. <strong style="color:var(--amber)">Recommendation:</strong> Immediately prioritize the 87 P2 escalated requests and consider temporarily reallocating 2 field teams from Transportation (currently 85% SLA compliant) to reduce the overdue queue within 72 hours."
+    </p>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">The 3-Layer AI System</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Layer 1 — Cache Check (CACHED badge)</h4>
+        <p>First, the system checks if there's already an insight for this department generated less than 6 hours ago. If yes — return it instantly. No API call needed. This prevents burning money on OpenAI for every page reload.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Layer 2 — OpenAI GPT-4 (AI GENERATED badge)</h4>
+        <p>If the cache is expired (older than 6 hours), the backend builds a prompt with the department's real metrics and sends it to OpenAI. The response is saved to the <code>ai_insights</code> table for future caching.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Layer 3 — Rule-Based Fallback (RULE-BASED badge)</h4>
+        <p>If no OpenAI API key is configured (as in the demo setup), a built-in if/else engine generates a useful insight based on the numbers alone. No AI needed — just logic.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>Spring Boot — AIInsightService.java (complete logic)</span>
+    </div>
+    <pre><span class="kw">public</span> AIInsight <span class="fn">getInsight</span>(<span class="ty">Long</span> departmentId) {
+
+    <span class="cm">// LAYER 1: Check cache — is there a fresh insight (under 6 hours)?</span>
+    Optional&lt;AIInsight&gt; cached = insightRepo
+        .findByDeptIdAndGeneratedAtAfter(departmentId, LocalDateTime.now().minusHours(<span class="nu">6</span>));
+    <span class="kw">if</span> (cached.isPresent()) {
+        cached.get().setSource(<span class="st">"CACHED"</span>);
+        <span class="kw">return</span> cached.get();
+    }
+
+    <span class="cm">// LAYER 2: Try OpenAI if API key is configured</span>
+    <span class="kw">if</span> (openAiKeyConfigured) {
+        DeptMetrics metrics = deptService.getMetrics(departmentId);
+        String prompt = buildPrompt(metrics);  <span class="cm">// builds the message to send</span>
+        String aiText = openAiClient.complete(prompt);
+        AIInsight insight = <span class="kw">new</span> AIInsight(departmentId, aiText, <span class="st">"AI_GENERATED"</span>);
+        <span class="kw">return</span> insightRepo.save(insight);
+    }
+
+    <span class="cm">// LAYER 3: Fall back to rule-based engine</span>
+    <span class="kw">return</span> generateRuleBased(departmentId);
+}
+
+<span class="cm">// Rule-based fallback — pure if/else logic</span>
+<span class="kw">private</span> AIInsight <span class="fn">generateRuleBased</span>(<span class="ty">Long</span> deptId) {
+    DeptMetrics m = deptService.getMetrics(deptId);
+    String text;
+
+    <span class="kw">if</span> (m.getSlaCompliance() < <span class="nu">70</span>) {
+        text = m.getName() + <span class="st">" is critically underperforming with "</span>
+             + m.getSlaCompliance() + <span class="st">"% SLA compliance. Immediate action required."</span>;
+    } <span class="kw">else if</span> (m.getAvgResolutionHours() > <span class="nu">72</span>) {
+        text = m.getName() + <span class="st">" resolution times exceed targets. Consider staff reallocation."</span>;
+    } <span class="kw">else</span> {
+        text = m.getName() + <span class="st">" is performing within acceptable parameters."</span>;
+    }
+    <span class="kw">return</span> <span class="kw">new</span> AIInsight(deptId, text, <span class="st">"RULE_BASED"</span>);
+}</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 8 — DATABASE DESIGN
+════════════════════════════════════════════════ -->
+<section class="section" id="database">
+  <div class="section-header">
+    <span class="section-number">08</span>
+    <div>
+      <h2>Database <span>Design</span></h2>
+      <p class="section-desc">Every table, every column, and why each one exists. The foundation everything else is built on.</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>PostgreSQL — Complete Schema (run this first)</span>
+    </div>
+    <pre><span class="cm">-- 1. USERS TABLE — stores all login accounts</span>
+<span class="kw">CREATE TABLE</span> users (
+  id            SERIAL PRIMARY KEY,
+  username      VARCHAR(50) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,      <span class="cm">-- BCrypt hash, never plain text</span>
+  role          VARCHAR(20) NOT NULL,       <span class="cm">-- ADMIN, MANAGER, ANALYST</span>
+  created_at    TIMESTAMP DEFAULT NOW()
+);
+
+<span class="cm">-- 2. DEPARTMENTS TABLE — the 8 city departments</span>
+<span class="kw">CREATE TABLE</span> departments (
+  id   SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL
+);
+
+<span class="cm">-- 3. SERVICE_REQUESTS TABLE — the core table (10,000+ rows)</span>
+<span class="kw">CREATE TABLE</span> service_requests (
+  id               SERIAL PRIMARY KEY,
+  title            VARCHAR(255) NOT NULL,
+  description      TEXT,
+  department_id    INT REFERENCES departments(id),
+  category         VARCHAR(50),   <span class="cm">-- Infrastructure, Permits, Utilities, etc.</span>
+  priority         VARCHAR(5),    <span class="cm">-- P1, P2, P3, P4, P5</span>
+  status           VARCHAR(20) DEFAULT 'OPEN',
+  assigned_to      VARCHAR(100),
+  resolution_notes TEXT,
+  submitted_at     TIMESTAMP DEFAULT NOW(),
+  resolved_at      TIMESTAMP,     <span class="cm">-- SET when status changes to RESOLVED</span>
+  sla_deadline     TIMESTAMP,     <span class="cm">-- calculated from priority on insert</span>
+  priority_score   FLOAT DEFAULT 0
+);
+
+<span class="cm">-- 4. AI_INSIGHTS TABLE — cache for generated insights</span>
+<span class="kw">CREATE TABLE</span> ai_insights (
+  id            SERIAL PRIMARY KEY,
+  department_id INT REFERENCES departments(id),
+  insight_text  TEXT,
+  source        VARCHAR(20),  <span class="cm">-- CACHED, AI_GENERATED, RULE_BASED</span>
+  generated_at  TIMESTAMP DEFAULT NOW()
+);
+
+<span class="cm">-- SEED: Insert the 8 departments</span>
+<span class="kw">INSERT INTO</span> departments (name) VALUES
+  ('Public Works'), ('Health & Human Services'), ('Transportation'),
+  ('Parks & Recreation'), ('Building & Permits'),
+  ('Water & Sanitation'), ('Public Safety'), ('Information Technology');
+
+<span class="cm">-- SEED: Insert demo users (BCrypt of 'admin123')</span>
+<span class="kw">INSERT INTO</span> users (username, password_hash, role) VALUES
+  ('admin',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN'),
+  ('manager1', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'MANAGER'),
+  ('analyst1', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ANALYST');</pre>
+  </div>
+
+  <div class="alert alert-cyan">
+    <strong>How the Tables Connect:</strong>
+    <code>service_requests.department_id</code> is a foreign key pointing to <code>departments.id</code>. So each request belongs to one department. <code>ai_insights.department_id</code> also points to <code>departments.id</code>. This is a relational database — tables reference each other by ID rather than duplicating data.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 9 — REST API ENDPOINTS
+════════════════════════════════════════════════ -->
+<section class="section" id="api">
+  <div class="section-header">
+    <span class="section-number">09</span>
+    <div>
+      <h2>REST API <span>Endpoints</span></h2>
+      <p class="section-desc">Every URL the frontend calls, what it sends, what it gets back, and who is allowed to call it.</p>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead><tr><th>Method</th><th>URL</th><th>What It Does</th><th>Who Can Call</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:12px">POST</span></td>
+        <td><code>/api/auth/login</code></td>
+        <td>Login. Returns JWT token + role.</td>
+        <td>Anyone (no token needed)</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:12px">GET</span></td>
+        <td><code>/api/dashboard/overview</code></td>
+        <td>Returns all 4 KPI numbers + all 8 dept summaries</td>
+        <td>All logged-in users</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:12px">GET</span></td>
+        <td><code>/api/dashboard/department/{id}</code></td>
+        <td>Returns drill-down charts data for one department</td>
+        <td>All logged-in users</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:12px">GET</span></td>
+        <td><code>/api/requests?page=0&status=OPEN&deptId=1</code></td>
+        <td>Returns paginated list (20/page) with optional filters</td>
+        <td>All logged-in users</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:12px">POST</span></td>
+        <td><code>/api/requests</code></td>
+        <td>Creates a new service request</td>
+        <td><span class="role role-admin">ADMIN</span> <span class="role role-manager">MANAGER</span></td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px">PUT</span></td>
+        <td><code>/api/requests/{id}/status</code></td>
+        <td>Updates status, assignee, resolution notes</td>
+        <td><span class="role role-admin">ADMIN</span> <span class="role role-manager">MANAGER</span></td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:12px">GET</span></td>
+        <td><code>/api/insights</code></td>
+        <td>Returns all cached AI insights</td>
+        <td>All logged-in users</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:12px">POST</span></td>
+        <td><code>/api/insights/generate/{deptId}</code></td>
+        <td>Generates fresh insight for one department</td>
+        <td><span class="role role-admin">ADMIN</span> <span class="role role-manager">MANAGER</span></td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--green);font-family:'JetBrains Mono',monospace;font-size:12px">POST</span></td>
+        <td><code>/api/insights/generate-all</code></td>
+        <td>Generates insights for all 8 departments</td>
+        <td><span class="role role-admin">ADMIN</span> <span class="role role-manager">MANAGER</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-green">
+    <strong>How the Frontend Calls These APIs:</strong>
+    Every API call (except login) attaches the JWT token. Example: <code>fetch('/api/requests', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })</code>. Spring Boot reads this token, verifies it, extracts the role, and either proceeds or returns 403 Forbidden.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 10 — AUTH & JWT
+════════════════════════════════════════════════ -->
+<section class="section" id="auth">
+  <div class="section-header">
+    <span class="section-number">10</span>
+    <div>
+      <h2>Authentication <span>& JWT</span></h2>
+      <p class="section-desc">How login works, what a JWT token is, and how Spring Boot verifies every request.</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="card-icon ci-purple">🔑</span> What Is a JWT Token?</h3>
+      <p>A JWT (JSON Web Token) is a long encoded string with 3 parts separated by dots:<br><br>
+      <code style="font-size:10px;word-break:break-all">eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyMSIsInJvbGUiOiJNQU5BR0VSIn0.abc123</code><br><br>
+      Part 1: Header (algorithm). Part 2: Payload (username + role). Part 3: Signature (prevents tampering). The server can verify it without storing anything — the signature proves it was issued by your server.</p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-red">🛡️</span> Spring Security Filter</h3>
+      <p>Every incoming request passes through <code>JwtFilter.java</code> before reaching any controller. It:<br><br>
+      1. Reads the <code>Authorization</code> header<br>
+      2. Extracts and verifies the JWT<br>
+      3. Loads the username and role<br>
+      4. Sets the security context (Spring now knows who you are)<br>
+      5. Passes the request to the controller</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>Spring Boot — JwtFilter.java (intercepts every request)</span>
+    </div>
+    <pre><span class="an">@Component</span>
+<span class="kw">public class</span> <span class="ty">JwtFilter</span> <span class="kw">extends</span> OncePerRequestFilter {
+
+    <span class="an">@Override</span>
+    <span class="kw">protected void</span> <span class="fn">doFilterInternal</span>(HttpServletRequest req, ...) {
+
+        <span class="cm">// 1. Get the Authorization header</span>
+        String authHeader = req.getHeader(<span class="st">"Authorization"</span>);
+
+        <span class="cm">// 2. Check it starts with "Bearer "</span>
+        <span class="kw">if</span> (authHeader == null || !authHeader.startsWith(<span class="st">"Bearer "</span>)) {
+            filterChain.doFilter(req, res); <span class="cm">// no token, continue (will get 403 later)</span>
+            <span class="kw">return</span>;
+        }
+
+        <span class="cm">// 3. Extract the token part (after "Bearer ")</span>
+        String token = authHeader.substring(<span class="nu">7</span>);
+
+        <span class="cm">// 4. Verify token + extract username and role</span>
+        String username = jwtUtil.extractUsername(token);
+        String role = jwtUtil.extractRole(token);
+
+        <span class="cm">// 5. Set authentication in Spring Security context</span>
+        UsernamePasswordAuthenticationToken auth =
+            <span class="kw">new</span> UsernamePasswordAuthenticationToken(username, null, List.of(<span class="kw">new</span> SimpleGrantedAuthority(role)));
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        filterChain.doFilter(req, res); <span class="cm">// proceed to the actual controller</span>
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 11 — ROLES
+════════════════════════════════════════════════ -->
+<section class="section" id="roles">
+  <div class="section-header">
+    <span class="section-number">11</span>
+    <div>
+      <h2>Role-Based <span>Access Control</span></h2>
+      <p class="section-desc">What each role can and cannot do — both in the UI and enforced at the API level.</p>
+    </div>
+  </div>
+
+  <table class="data-table">
+    <thead><tr><th>Feature</th><th><span class="role role-admin">ADMIN</span></th><th><span class="role role-manager">MANAGER</span></th><th><span class="role role-analyst">ANALYST</span></th></tr></thead>
+    <tbody>
+      <tr><td>View Overview Dashboard</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>View Service Requests</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>View AI Insights</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Create New Request</td><td>✅</td><td>✅</td><td>❌ (button hidden)</td></tr>
+      <tr><td>Update Request Status</td><td>✅</td><td>✅</td><td>❌ (button hidden)</td></tr>
+      <tr><td>Generate AI Insights</td><td>✅</td><td>✅</td><td>❌ (button hidden)</td></tr>
+      <tr><td>User Management</td><td>✅</td><td>❌</td><td>❌</td></tr>
+    </tbody>
+  </table>
+
+  <div class="alert alert-cyan">
+    <strong>Two Layers of Protection:</strong>
+    (1) The React frontend hides buttons based on role (e.g., ANALYST never sees "+ New Request"). (2) The Spring Boot backend enforces it at the API level with <code>@PreAuthorize</code> annotations — so even if someone bypasses the UI, the API will still reject unauthorized calls.
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>React — Hiding buttons by role</span>
+    </div>
+    <pre><span class="cm">// In Requests tab component</span>
+<span class="kw">const</span> { role } = useContext(AuthContext); <span class="cm">// role from login response</span>
+
+<span class="kw">return</span> (
+  &lt;div&gt;
+    &lt;RequestsTable /&gt;
+
+    <span class="cm">// This button only renders for ADMIN and MANAGER</span>
+    {(role === <span class="st">'ADMIN'</span> || role === <span class="st">'MANAGER'</span>) && (
+      &lt;button onClick={openNewRequestForm}&gt;+ New Request&lt;/button&gt;
+    )}
+  &lt;/div&gt;
+);</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 12 — SLA SYSTEM
+════════════════════════════════════════════════ -->
+<section class="section" id="sla">
+  <div class="section-header">
+    <span class="section-number">12</span>
+    <div>
+      <h2>The SLA <span>System</span></h2>
+      <p class="section-desc">What SLA means, how deadlines are calculated, and how compliance percentage is tracked.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-cyan">
+    <strong>SLA = Service Level Agreement</strong> — it's the deadline by which a request MUST be resolved. Different priorities have different deadlines. Missing the deadline means the request is counted as "SLA breached" and lowers your compliance percentage.
+  </div>
+
+  <table class="data-table">
+    <thead><tr><th>Priority</th><th>Deadline</th><th>Meaning</th><th>Example Use Case</th></tr></thead>
+    <tbody>
+      <tr><td><span class="priority p1">P1 Critical</span></td><td>4 hours</td><td>Life/safety at risk — must resolve same day</td><td>Gas leak, fire hazard, collapsed road</td></tr>
+      <tr><td><span class="priority p2">P2 High</span></td><td>12 hours</td><td>Major disruption — same day resolution</td><td>Traffic signal down, sewage overflow</td></tr>
+      <tr><td><span class="priority p3">P3 Medium</span></td><td>48 hours</td><td>Normal service — resolve within 2 days</td><td>Pothole, streetlight out, graffiti</td></tr>
+      <tr><td><span class="priority p4">P4 Low</span></td><td>5 days</td><td>Minor issue — resolve within a week</td><td>Park bench broken, missing street sign</td></tr>
+      <tr><td><span class="priority p5">P5 Minimal</span></td><td>10 days</td><td>Cosmetic — resolve within 2 weeks</td><td>Landscaping request, noise complaint</td></tr>
+    </tbody>
+  </table>
+
+  <div class="card" style="margin-top:24px">
+    <h3><span class="card-icon ci-amber">📐</span> SLA Compliance Formula</h3>
+    <div style="background:var(--code-bg);border-radius:8px;padding:16px 20px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);text-align:center">
+      SLA Compliance % = (Requests resolved BEFORE deadline ÷ Total resolved requests) × 100
+    </div>
+    <p style="margin-top:12px;font-size:14px;color:var(--text2)">
+      Currently showing <strong style="color:var(--red)">71.4%</strong> — below the 80% target. This means out of every 100 requests that were resolved, only 71 were resolved before their deadline. 29 took too long.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 13 — SEED DATA
+════════════════════════════════════════════════ -->
+<section class="section" id="seed">
+  <div class="section-header">
+    <span class="section-number">13</span>
+    <div>
+      <h2>Seed <span>Data</span></h2>
+      <p class="section-desc">Why the Requests tab shows 0 records, how to fix it, and how to make the data look realistic.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-red">
+    <strong>Why Requests Tab Shows 0 Records:</strong>
+    The backend API is returning an empty array because no data has been inserted into the <code>service_requests</code> table yet. You need to seed the database with 10,000 realistic requests.
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>Spring Boot — DataSeeder.java (runs on startup if DB is empty)</span>
+    </div>
+    <pre><span class="an">@Component</span>
+<span class="kw">public class</span> <span class="ty">DataSeeder</span> <span class="kw">implements</span> ApplicationRunner {
+
+    <span class="an">@Autowired</span> ServiceRequestRepository requestRepo;
+    <span class="an">@Autowired</span> DepartmentRepository deptRepo;
+
+    <span class="kw">private final</span> Random random = <span class="kw">new</span> Random();
+
+    String[] titles = {
+        <span class="st">"Pothole repair needed"</span>, <span class="st">"Street light outage"</span>, <span class="st">"Building permit review"</span>,
+        <span class="st">"Water main leak"</span>, <span class="st">"Park equipment broken"</span>, <span class="st">"Road line fading"</span>,
+        <span class="st">"Sewage backup"</span>, <span class="st">"Graffiti removal"</span>, <span class="st">"Noise complaint"</span>
+    };
+    String[] categories = {<span class="st">"Infrastructure"</span>, <span class="st">"Permits"</span>, <span class="st">"Utilities"</span>,
+                           <span class="st">"Maintenance"</span>, <span class="st">"Safety"</span>, <span class="st">"Complaint"</span>};
+    String[] statuses = {<span class="st">"OPEN"</span>, <span class="st">"IN_PROGRESS"</span>, <span class="st">"RESOLVED"</span>, <span class="st">"CLOSED"</span>, <span class="st">"ESCALATED"</span>};
+    String[] priorities = {<span class="st">"P1"</span>, <span class="st">"P2"</span>, <span class="st">"P3"</span>, <span class="st">"P4"</span>, <span class="st">"P5"</span>};
+
+    <span class="an">@Override</span>
+    <span class="kw">public void</span> <span class="fn">run</span>(ApplicationArguments args) {
+        <span class="kw">if</span> (requestRepo.count() > <span class="nu">0</span>) <span class="kw">return</span>; <span class="cm">// skip if already seeded</span>
+
+        List&lt;Department&gt; depts = deptRepo.findAll();
+        List&lt;ServiceRequest&gt; batch = <span class="kw">new</span> ArrayList&lt;&gt;();
+
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nu">0</span>; i < <span class="nu">10000</span>; i++) {
+            ServiceRequest sr = <span class="kw">new</span> ServiceRequest();
+            sr.setTitle(titles[random.nextInt(titles.length)]);
+            sr.setCategory(categories[random.nextInt(categories.length)]);
+            sr.setDepartment(depts.get(random.nextInt(depts.size())));
+            sr.setPriority(priorities[random.nextInt(priorities.length)]);
+
+            <span class="cm">// Spread submissions over past 12 months</span>
+            <span class="kw">int</span> daysAgo = random.nextInt(<span class="nu">365</span>);
+            sr.setSubmittedAt(LocalDateTime.now().minusDays(daysAgo));
+
+            <span class="cm">// 50% chance it's resolved</span>
+            String status = statuses[random.nextInt(statuses.length)];
+            sr.setStatus(status);
+            <span class="kw">if</span> (status.equals(<span class="st">"RESOLVED"</span>) || status.equals(<span class="st">"CLOSED"</span>)) {
+                sr.setResolvedAt(sr.getSubmittedAt().plusHours(random.nextInt(<span class="nu">72</span>)));
+            }
+
+            batch.add(sr);
+            <span class="kw">if</span> (batch.size() == <span class="nu">500</span>) {       <span class="cm">// insert in batches of 500</span>
+                requestRepo.saveAll(batch);
+                batch.clear();
+            }
+        }
+        <span class="kw">if</span> (!batch.isEmpty()) requestRepo.saveAll(batch);
+        System.out.println(<span class="st">"✅ Seeded 10,000 service requests"</span>);
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 14 — LIVE DATA STRATEGY
+════════════════════════════════════════════════ -->
+<section class="section" id="live-data">
+  <div class="section-header">
+    <span class="section-number">14</span>
+    <div>
+      <h2>Live Data <span>Strategy</span></h2>
+      <p class="section-desc">Should you use dummy data or real data? How to get real government data. What employers actually want to see.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-green">
+    <strong>The honest answer: Dummy/seeded data is completely normal and expected for a government analytics portfolio project.</strong> No city will give you their real database. Real data has citizens' personal information (PII) which creates legal issues. Employers don't care if data is real — they care if the system is architecturally sound.
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:28px 0 16px;color:var(--cyan)">Option A — Smart Seed Data (Recommended for Portfolio)</h3>
+  <p style="color:var(--text2);margin-bottom:16px">Make your fake data <em>statistically realistic</em>. Employers are impressed by this.</p>
+  <div class="grid-2">
+    <div class="card">
+      <h3><span class="card-icon ci-amber">📊</span> Realistic Patterns to Add</h3>
+      <p>
+        • Pothole reports spike in winter months (Jan-Feb)<br>
+        • Parks & Recreation peaks in summer (Jun-Aug)<br>
+        • Building permits are consistent year-round<br>
+        • P1 requests are rare — only 3-5% of total<br>
+        • ~71% resolve before SLA (matching your current 71.4% shown)
+      </p>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon ci-green">💬</span> What to Say to Employers</h3>
+      <p>"The system is seeded with 10,000 statistically realistic service requests modeled on public municipal data patterns. In a production deployment, this would connect to the city's existing 311 system or ticketing database via REST API integration."</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:32px 0 16px;color:var(--cyan)">Option B — Real Live Government Data (Best for Standout Portfolio)</h3>
+  <p style="color:var(--text2);margin-bottom:16px">Many US cities publish their 311 service request data publicly and freely.</p>
+  <table class="data-table">
+    <thead><tr><th>City</th><th>API URL</th><th>Data Available</th></tr></thead>
+    <tbody>
+      <tr><td>🗽 New York City</td><td><code>data.cityofnewyork.us/resource/erm2-nwe9.json</code></td><td>311 complaints, dept, status, dates — millions of rows</td></tr>
+      <tr><td>🌬️ Chicago</td><td><code>data.cityofchicago.org/resource/v6vf-nfxy.json</code></td><td>311 requests, location, category, resolution time</td></tr>
+      <tr><td>🌉 San Francisco</td><td><code>data.sfgov.org/resource/vw6y-z8j6.json</code></td><td>Case management data, dept assignments</td></tr>
+    </tbody>
+  </table>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><span class="code-dot cd-red"></span><span class="code-dot cd-yellow"></span><span class="code-dot cd-green"></span></div>
+      <span>Spring Boot — Fetching Real NYC 311 Data to Seed Your DB</span>
+    </div>
+    <pre><span class="an">@Service</span>
+<span class="kw">public class</span> <span class="ty">NycDataImporter</span> {
+
+    <span class="kw">public void</span> <span class="fn">importNycData</span>() {
+        String url = <span class="st">"https://data.cityofnewyork.us/resource/erm2-nwe9.json"</span>
+                   + <span class="st">"?$limit=10000&$where=created_date>'2024-01-01'"</span>;
+
+        RestTemplate rest = <span class="kw">new</span> RestTemplate();
+        NycRequest[] nycData = rest.getForObject(url, NycRequest[].class);
+
+        <span class="kw">for</span> (NycRequest nyc : nycData) {
+            ServiceRequest sr = <span class="kw">new</span> ServiceRequest();
+            sr.setTitle(nyc.getComplaintType());
+            sr.setStatus(nyc.getStatus().equals(<span class="st">"Closed"</span>) ? <span class="st">"RESOLVED"</span> : <span class="st">"OPEN"</span>);
+            <span class="cm">// Map NYC agency → your 8 departments</span>
+            sr.setDepartment(mapAgencyToDept(nyc.getAgency()));
+            requestRepo.save(sr);
+        }
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 15 — BUGS & FIXES
+════════════════════════════════════════════════ -->
+<section class="section" id="bugs">
+  <div class="section-header">
+    <span class="section-number">15</span>
+    <div>
+      <h2>Current Bugs <span>& Fixes</span></h2>
+      <p class="section-desc">Every known issue in the current state of the project and exactly how to fix each one.</p>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(255,77,109,0.3);background:rgba(255,77,109,0.04);margin-bottom:16px">
+    <h3 style="color:var(--red)">🔴 Bug 1 — Requests Tab Shows "0 total records"</h3>
+    <p><strong>Cause:</strong> No data in the <code>service_requests</code> table.<br>
+    <strong>Fix:</strong> Add the <code>DataSeeder.java</code> class from Section 13. It will auto-run when Spring Boot starts and insert 10,000 requests if the table is empty.<br>
+    <strong>Verify:</strong> Check in PostgreSQL: <code>SELECT COUNT(*) FROM service_requests;</code> should return 10000.</p>
+  </div>
+
+  <div class="card" style="border-color:rgba(255,77,109,0.3);background:rgba(255,77,109,0.04);margin-bottom:16px">
+    <h3 style="color:var(--red)">🔴 Bug 2 — AI Insights Shows "Failed to load insights"</h3>
+    <p><strong>Cause:</strong> The <code>GET /api/insights</code> endpoint is throwing an error — likely the <code>ai_insights</code> table doesn't exist, or there's a NullPointerException in the service.<br>
+    <strong>Fix Step 1:</strong> Run <code>CREATE TABLE ai_insights (...)</code> from Section 8.<br>
+    <strong>Fix Step 2:</strong> In your React fetch, add error handling: <code>.catch(err => setError("Failed to load insights."))</code>. Also check that the endpoint returns an empty array <code>[]</code> (not null) when the table has no rows.</p>
+  </div>
+
+  <div class="card" style="border-color:rgba(255,184,0,0.3);background:rgba(255,184,0,0.04);margin-bottom:16px">
+    <h3 style="color:var(--amber)">🟡 Bug 3 — No "Generate Insight" Controls Visible</h3>
+    <p><strong>Cause:</strong> The dropdown and Generate button on the AI Insights page are either not rendered or the role check is failing.<br>
+    <strong>Fix:</strong> Make sure you're logged in as <code>manager1</code> or <code>admin</code>. ANALYST accounts cannot see the generate controls. Check that role is stored in React Context after login and the conditional rendering logic is <code>{role === 'MANAGER' || role === 'ADMIN'}</code>.</p>
+  </div>
+
+  <div class="card" style="border-color:rgba(255,184,0,0.3);background:rgba(255,184,0,0.04)">
+    <h3 style="color:var(--amber)">🟡 Bug 4 — Priority Score Not Updating</h3>
+    <p><strong>Cause:</strong> The scheduled job to recalculate priority scores hasn't been implemented yet.<br>
+    <strong>Fix:</strong> Add a <code>@Scheduled(cron = "0 0 * * * *")</code> method in a service class that runs every hour, loops through all OPEN/IN_PROGRESS requests, and updates their <code>priority_score</code> using the formula from Section 6.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 16 — PRESENTING TO EMPLOYERS
+════════════════════════════════════════════════ -->
+<section class="section" id="demo">
+  <div class="section-header">
+    <span class="section-number">16</span>
+    <div>
+      <h2>Presenting <span>to Employers</span></h2>
+      <p class="section-desc">How to demo this project confidently, what story to tell, and what makes it impressive.</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:0 0 20px;color:var(--cyan)">Recommended Demo Script (5 Minutes)</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>Start with the problem (30 seconds)</h4>
+        <p>"City governments manage thousands of service requests daily — potholes, permits, water leaks — but most track them in spreadsheets with no real-time visibility. GovLens is a full-stack analytics platform that solves this."</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>Show the login + role system (45 seconds)</h4>
+        <p>"The system has three roles. Let me log in as an Analyst first — read-only access. Now as a Manager — I can create and update requests. Notice the buttons appear that weren't there before. Role enforcement happens both in the UI and at the API level with JWT."</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>Show the Overview Dashboard (1 minute)</h4>
+        <p>"This gives real-time KPIs across all 8 departments. Notice Transportation is at 85% SLA — the only one above the 80% target. Public Works is at 71% with 485 overdue requests — that red bar is alerting the manager immediately. Click any card to drill down."</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>Show the Requests table with filters (1 minute)</h4>
+        <p>"10,000 requests — paginated, filterable by department and status. I can filter to only show ESCALATED requests in Public Works. The priority score dynamically increases as requests age and approach their SLA deadline."</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>Generate an AI Insight live (1 minute)</h4>
+        <p>"This is the most impressive part — I click Generate for Public Works, and GPT-4 analyzes the actual metrics and produces a specific recommendation in plain English. The system caches this for 6 hours to be cost-efficient, with a rule-based fallback if no API key is configured."</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>Close with tech stack and what you'd add next (30 seconds)</h4>
+        <p>"Backend is Java Spring Boot with PostgreSQL. Frontend is React with Recharts. JWT authentication with role-based access. Next steps would be a citizen-facing mobile app for request submission, and integration with real city 311 APIs."</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Syne',sans-serif;font-size:18px;margin:32px 0 16px;color:var(--cyan)">What Makes This Project Stand Out</h3>
+  <ul class="checklist">
+    <li><span class="check">✓</span> Multi-role authentication with JWT — not just a simple login</li>
+    <li><span class="check">✓</span> Real-world business logic — SLA deadlines, compliance tracking, priority scoring</li>
+    <li><span class="check">✓</span> AI integration with 3-layer fallback (Cache → GPT-4 → Rule-based)</li>
+    <li><span class="check">✓</span> Realistic domain — government service management is a well-understood problem</li>
+    <li><span class="check">✓</span> Large dataset handling — pagination, filtering across 10,000 rows</li>
+    <li><span class="check">✓</span> Full-stack — frontend, backend, database, and AI all connected</li>
+    <li><span class="warn">⚠</span> Needs seed data to show the Requests tab working — fix this before any demo</li>
+    <li><span class="cross">✗</span> No citizen portal yet — mention it as a "planned next feature"</li>
+  </ul>
+</section>
+
+<!-- FOOTER -->
+<div style="padding:40px 60px;background:var(--bg2);border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;justify-content:space-between;align-items:center;flex-wrap:gap:16px">
+  <span>GOVLENS DEVELOPER GUIDE · PREPARED FOR AMAN · APRIL 2026</span>
+  <span>16 SECTIONS · SPRING BOOT + REACT + POSTGRESQL + OPENAI</span>
+</div>
+
+</main>
+
+<script>
+  // Progress bar on scroll
+  window.addEventListener('scroll', () => {
+    const total = document.body.scrollHeight - window.innerHeight;
+    const progress = (window.scrollY / total) * 100;
+    document.querySelector('.progress-bar') && 
+      (document.querySelector('.progress-bar').style.transform = `scaleX(${progress/100})`);
+  });
+
+  // Add progress bar
+  const bar = document.createElement('div');
+  bar.className = 'progress-bar';
+  document.body.appendChild(bar);
+</script>
+</body>
+</html>
